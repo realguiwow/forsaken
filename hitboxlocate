@@ -9,11 +9,12 @@ local Animator = Humanoid:WaitForChild("Animator");
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart");
 
 Player.CharacterAdded:Connect(function(NewCharacter)
-    Character = NewCharacter;
-    Humanoid = Character:WaitForChild("Humanoid");
-    Animator = Humanoid:WaitForChild("Animator");
-    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart");
-end);
+	Character = NewCharacter;
+	Humanoid = Character:WaitForChild("Humanoid");
+	Animator = Humanoid:WaitForChild("Animator");
+	HumanoidRootPart = Character:WaitForChild("HumanoidRootPart");
+end)
+
 
 local AttackAnimations = {
 	'rbxassetid://131430497821198', --// MassInfection, 1x1x1x1
@@ -122,58 +123,48 @@ local AttackAnimations = {
 };
 
 local RNG = Random.new();
+
 game:GetService('RunService').Heartbeat:Connect(function()
-    if not HumanoidRootPart then
-        return;
-    end
+	if not HumanoidRootPart then return end
 
-    local Playing = false;
-    for _,v in Humanoid:GetPlayingAnimationTracks() do
-        if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
-            Playing = true;
-        end
-    end
+	local Playing = false;
+	for _, v in Humanoid:GetPlayingAnimationTracks() do
+		if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
+			Playing = true;
+		end
+	end
+	if not Playing then return end
 
-    if not Playing then
-        return;
-    end
+	local Target;
+	local NearestDist = 120;
 
-    local Target;
-    local NearestDist = 120;
+	local function loop(t)
+		for _, v in t do
+			if v == Character or not v:FindFirstChild("HumanoidRootPart") then continue end
+			local Dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude;
+			if Dist < NearestDist then
+				NearestDist = Dist;
+				Target = v;
+			end
+		end
+	end
 
-    local function loop(t)
-        for _,v in t do
-            if v == Character or not v:FindFirstChild("HumanoidRootPart") then
-                continue;
-            end
+	loop(workspace.Players:GetDescendants());
 
-            local Dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude;
+	local npcFolder = workspace.Map:FindFirstChild("NPCs", true);
+	if npcFolder then loop(npcFolder:GetChildren()) end
 
-            if Dist < NearestDist then
-                NearestDist = Dist;
-                Target = v;
-            end
-        end
-    end
+	if not Target then return end
 
-    loop(workspace.Players:GetDescendants());
-    loop(workspace.Map:FindFirstChild("NPCs", true):GetChildren());
+	local OldVelocity = HumanoidRootPart.Velocity;
 
-    if not Target then
-        return;
-    end
+	local NeededVelocity = (
+		Target.HumanoidRootPart.Position - HumanoidRootPart.Position
+	) / 0.2
 
-    local OldVelocity = HumanoidRootPart.Velocity;
-    local NeededVelocity =
-    (Target.HumanoidRootPart.Position + vector.create(
-        RNG:NextNumber(-1.5, 1.5),
-        0,
-        RNG:NextNumber(-1.5, 1.5)
-    ) + (Target.HumanoidRootPart.Velocity * (Player:GetNetworkPing() * 1.25))
-        - HumanoidRootPart.Position
-    ) / (Player:GetNetworkPing() * 2);
+	HumanoidRootPart.Velocity = NeededVelocity;
 
-    HumanoidRootPart.Velocity = NeededVelocity;
-    game:GetService('RunService').RenderStepped:Wait();
-    HumanoidRootPart.Velocity = OldVelocity;
-end);
+	game:GetService('RunService').RenderStepped:Wait();
+
+	HumanoidRootPart.Velocity = OldVelocity;
+end)
