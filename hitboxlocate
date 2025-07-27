@@ -1,2 +1,87 @@
-game.Players.LocalPlayer:Kick("剪切板是新版")
-setclipboard("用你老母我操你妈我是反外挂的糟糕的瞄准机器人黑客，我们都讨厌，报告那个瓷器，我们竞争需要和平。外挂犯法你知道吗有道德心吗绿色环境全是因为你们这些外g才鸟烟瘴气的,好果你再发外g视频我就举报你破坏计数器犯罪,我劝你好好反思真的看不起你们这些外挂的，你们这情况的话，动动手指就可以暴打我们。而我们需要苦练好几年的技术才可以勉强望到你们的一角。机狗真的气死我了。我现在。检测到了非法客户端的数据。safedog正在监测你的移动。你已被踢出服务器")
+repeat task.wait() until game:IsLoaded();
+
+    'rbxassetid://73502073176819','rbxassetid://129843313690921','rbxassetid://97623143664485',
+    'rbxassetid://129843313690921','rbxassetid://97623143664485','rbxassetid://97623143664485',
+    'rbxassetid://97623143664485','rbxassetid://86709774283672','rbxassetid://106014898528300',
+    'rbxassetid://87259391926321','rbxassetid://140703210927645','rbxassetid://96173857867228',
+    'rbxassetid://121255898612475','rbxassetid://98031287364865','rbxassetid://119462383658044',
+    'rbxassetid://77448521277146','rbxassetid://77448521277146','rbxassetid://103741352379819',
+    'rbxassetid://119462383658044','rbxassetid://131696603025265','rbxassetid://122503338277352',
+    'rbxassetid://97648548303678','rbxassetid://94162446513587','rbxassetid://84426150435898',
+    'rbxassetid://93069721274110','rbxassetid://114620047310688','rbxassetid://97433060861952',
+    'rbxassetid://82183356141401','rbxassetid://100592913030351','rbxassetid://121293883585738',
+    'rbxassetid://100592913030351','rbxassetid://121293883585738','rbxassetid://100592913030351',
+    'rbxassetid://121293883585738','rbxassetid://70447634862911','rbxassetid://92173139187970',
+    'rbxassetid://106847695270773','rbxassetid://125403313786645','rbxassetid://81639435858902',
+    'rbxassetid://137314737492715','rbxassetid://120112897026015','rbxassetid://82113744478546',
+    'rbxassetid://118298475669935','rbxassetid://82113744478546','rbxassetid://118298475669935',
+    'rbxassetid://126681776859538','rbxassetid://129976080405072','rbxassetid://109667959938617',
+    'rbxassetid://74707328554358','rbxassetid://133336594357903','rbxassetid://86204001129974',
+    'rbxassetid://82113744478546','rbxassetid://118298475669935','rbxassetid://124243639579224',
+    'rbxassetid://70371667919898','rbxassetid://131543461321709','rbxassetid://136323728355613',
+    'rbxassetid://109230267448394','rbxassetid://109230267448394','rbxassetid://109230267448394',
+    'rbxassetid://109230267448394','rbxassetid://109230267448394','rbxassetid://109230267448394',
+    'rbxassetid://109230267448394','rbxassetid://109230267448394','rbxassetid://109230267448394',
+    'rbxassetid://109230267448394','rbxassetid://109230267448394','rbxassetid://109230267448394',
+    'rbxassetid://109230267448394'
+};
+
+
+local RNG = Random.new();
+game:GetService('RunService').Heartbeat:Connect(function()
+    if not HumanoidRootPart then return end
+
+
+    local Playing = false;
+    for _, v in Humanoid:GetPlayingAnimationTracks() do
+        if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
+            Playing = true;
+        end
+    end
+    if not Playing then return end
+
+
+    local Target;
+    local NearestDist = 120;
+
+
+    local function loop(t)
+        for _, v in t do
+            if v == Character or not v:FindFirstChild("HumanoidRootPart") then continue end
+            local Dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude;
+            if Dist < NearestDist then
+                NearestDist = Dist;
+                Target = v;
+            end
+        end
+    end
+
+
+    loop(workspace.Players:GetDescendants());
+    local npcsFolder = workspace.Map:FindFirstChild("NPCs", true);
+    if npcsFolder then loop(npcsFolder:GetChildren()) end
+    if not Target then return end
+
+
+    local ping = Player:GetNetworkPing();
+    local offset = Vector3.new(
+        RNG:NextNumber(-0.6, 0.6),
+        0,
+        RNG:NextNumber(-0.6, 0.6)
+    )
+
+
+    local NeededVelocity = (
+        Target.HumanoidRootPart.Position
+        + offset
+        - HumanoidRootPart.Position
+    ) / (ping * 2)
+
+
+    local OldVelocity = HumanoidRootPart.Velocity;
+    HumanoidRootPart.Velocity = NeededVelocity;
+
+
+    game:GetService('RunService').RenderStepped:Wait();
+    HumanoidRootPart.Velocity = OldVelocity;
+end);
